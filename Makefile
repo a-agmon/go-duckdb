@@ -2,15 +2,22 @@ DUCKDB_VERSION=0.4.0
 LIB_PATH := $(shell pwd)/lib
 
 ifeq ($(shell uname -s),Darwin)
-LIB_EXT=dylib
-ARCH_OS=osx-universal
-LIBRARY_PATH := DYLD_LIBRARY_PATH=$(LIB_PATH)
+	LIB_EXT=dylib
+	ARCH_OS=osx-universal
+	LIBRARY_PATH := DYLD_LIBRARY_PATH=$(LIB_PATH)
+	LIBS := lib/libduckdb.$(LIB_EXT)
+else ifeq ($(shell uname -s),Linux)
+	LIB_EXT=so
+	ARCH_OS=linux-amd64
+	LIBRARY_PATH := LD_LIBRARY_PATH=$(LIB_PATH)
+	LIBS := lib/libduckdb.$(LIB_EXT)
 else
-LIB_EXT=so
-ARCH_OS=linux-amd64
-LIBRARY_PATH := LD_LIBRARY_PATH=$(LIB_PATH)
+	LIB_EXT=dll
+	ARCH_OS=windows-amd64
+	LIBRARY_PATH := LD_LIBRARY_PATH=$(LIB_PATH)
+	LIBS := lib/duckdb.$(LIB_EXT)
 endif
-LIBS := lib/libduckdb.$(LIB_EXT)
+
 LDFLAGS := LIB=libduckdb.$(LIB_EXT) CGO_LDFLAGS="-L$(LIB_PATH)" $(LIBRARY_PATH) CGO_CFLAGS="-I$(LIB_PATH)"
 
 $(LIBS):
